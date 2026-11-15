@@ -54,18 +54,21 @@ public class TuringMachine {
     private final Map<Integer, Character> tape = new HashMap<>();
     private final Map<TransitionKey, TransitionRule> transitions = new HashMap<>();
     private final Set<String> haltStates = new HashSet<>();
+    private final String initialState;
     private final char blankSymbol;
 
     private String currentState;
     private int headPosition;
 
     public TuringMachine(String initialState, char blankSymbol) {
+        this.initialState = initialState;
         this.currentState = initialState;
         this.blankSymbol = blankSymbol;
     }
 
     public void loadTape(String input) {
         tape.clear();
+        currentState = initialState;
         headPosition = 0;
         for (int i = 0; i < input.length(); i++) {
             char symbol = input.charAt(i);

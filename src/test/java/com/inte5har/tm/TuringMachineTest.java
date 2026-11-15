@@ -41,5 +41,12 @@ public class TuringMachineTest {
         assertEquals(4, steps, "run should process all transitions until halt");
         assertEquals("halt", machine.getCurrentState(), "machine should enter halt state");
         assertEquals("1111", machine.getTapeSnapshot(), "unary increment should append one symbol");
+
+        machine.loadTape("1");
+        int secondRunSteps = machine.run(100);
+
+        assertEquals(2, secondRunSteps, "run should work after loading another tape");
+        assertEquals("halt", machine.getCurrentState(), "machine should halt again on the second run");
+        assertEquals("11", machine.getTapeSnapshot(), "second unary increment should append one symbol");
     }
 }
