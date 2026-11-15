@@ -12,7 +12,10 @@ A [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) is an abstract 
 
 - Sparse tape with a configurable blank symbol
 - Transition rules keyed by state and read symbol
-- Halt states
+- Transition completeness validation (`isComplete`, `validateCompleteness`, `getMissingTransitions`)
+- Halt states, fallback halt state on missing rules (`setFallbackHaltState`), and execution status tracking (`TerminationReason`, `isHalted`, `isStuck`)
+- Configurable tape modes: doubly-infinite or semi-infinite (`TapeMode.SEMI_INFINITE`, left-bounded at 0)
+- Enhanced tape inspection and snapshots: arbitrary ranges, snapshots with head position (`getTapeSnapshot(includeHead)`), annotated snapshots with head marker (`getTapeSnapshotWithHead`), and coordinate offsets
 - Single-step execution (`step`)
 - Bounded execution (`run(maxSteps)`)
 - Basic operations for direct control: `loadTape`, `readSymbol`, `writeSymbol`, `moveLeft`, `moveRight`, `stay`, `addTransition`, `addHaltState`
@@ -101,10 +104,22 @@ int steps = machine.run(100);
 System.out.println(machine.getTapeSnapshot()); // 1111
 ```
 
-## Limitations
+## Handling the Limitations
 
-- The simulator does not check that a rule exists for every state and symbol pair. If no rule matches, the run stops, and the machine does not enter a halt state.
-- The tape is stored sparsely. The head can move to negative positions, and the snapshot shows only the range between the leftmost and rightmost written cells.
+The simulator provides explicit options and utilities to address common Turing machine constraints:
+
+### 1. Missing Transition Rules and Halting
+- **Completeness check:** Use `machine.isComplete()` or `machine.validateCompleteness()` to verify that every state and symbol pair has a defined rule before running. Call `machine.getMissingTransitions()` to inspect which pairs are missing.
+- **Fallback halt state:** If no transition matches at runtime, the machine stops. To enter an explicit halt state on missing rules, configure `machine.setFallbackHaltState("reject")` (or `"halt"`). When a missing rule occurs, the machine enters that state, `isHalted()` returns `true`, and `getTerminationReason()` is `TerminationReason.HALTED`.
+- **Termination diagnostics:** Query `machine.getTerminationReason()` (`HALTED`, `MISSING_TRANSITION`, `STEP_LIMIT_REACHED`) or `machine.isStuck()` to distinguish normal completion from undefined transitions or step timeouts.
+- **Strict mode:** Enable `machine.setStrictTransitions(true)` to fail fast with an `IllegalStateException` whenever an undefined rule is encountered during execution.
+
+### 2. Tape Boundaries and Snapshots
+- **Tape modes (Semi-infinite vs. Doubly-infinite):** By default, the tape is doubly-infinite (`TapeMode.DOUBLY_INFINITE`), permitting negative head positions. For standard textbook semi-infinite tapes, set `machine.setTapeMode(TapeMode.SEMI_INFINITE)` so the head cannot move left beyond cell 0.
+- **Snapshot including head:** `machine.getTapeSnapshot(true)` expands the snapshot range to include the current head position even when the head is over unwritten blank cells.
+- **Visual snapshot with head marker:** `machine.getTapeSnapshotWithHead()` encloses the symbol under the head in brackets, e.g. `111[1]`.
+- **Custom slice snapshots:** `machine.getTapeSnapshot(fromPosition, toPosition)` returns the exact slice of the tape between any two coordinates.
+- **Coordinate offsets:** Inspect written tape boundaries with `machine.getMinPosition()`, `machine.getMaxPosition()`, and `machine.getTapeOffset()`.
 
 ## License
 
