@@ -106,10 +106,6 @@ System.out.println(machine.getTapeSnapshot()); // 1111
 - The simulator does not check that a rule exists for every state and symbol pair. If no rule matches, the run stops, and the machine does not enter a halt state.
 - The tape is stored sparsely. The head can move to negative positions, and the snapshot shows only the range between the leftmost and rightmost written cells.
 
-## Further reading
-
-- [Turing machine, Wikipedia](https://en.wikipedia.org/wiki/Turing_machine)
-
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE).
